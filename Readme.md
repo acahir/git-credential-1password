@@ -9,7 +9,15 @@ Git passes in parameters on stdin, and this utility returns a username and
 password on stdout if found. See the references for full details
 
 
-  
+### Status
+
+Currently only works with existing, non-expired tokens in the env. Otherwise when 
+prompted for the password to sign into 1Password, the following error occurs:
+```[LOG] 2019/01/22 06:46:56 (ERROR) inappropriate ioctl for device```
+
+To work around this, script currently includes a flag (requireEvnTokens) that exits
+if a valid token isn't found.
+
 
 ### Installation & Usage
 
