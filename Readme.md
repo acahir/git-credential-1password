@@ -26,12 +26,12 @@ The current working version is the python script.
 1. [Install](https://support.1password.com/command-line-getting-started/) the 1Password command line tool.
 2. Download the script and save it as an executable file somewhere in the PATH. On macOS, ```/usr/local/bin``` would be a good choice.
 3. To test the script, you can run it interactively from the command line.
-1. Launch the script: ````/path/to/git-credential-1password --domain=<your domain> get```
-2. You will be prompted to enter the "host" to search for, in the format 
+    1. Launch the script: ````/path/to/git-credential-1password --domain=<your domain> get```
+    2. You will be prompted to enter the "host" to search for, in the format 
 ```host=example.com```. This is actually the name of an item in 1Password, such 
 as "github.com". You can search for anything as a test, but git will use the host of the remote git service as the search value.
-3. Enter a blank line after you have entered the host.
-4. 
+    3. Enter a blank line after you have entered the host.
+    4. If you have a valid token, that's it. Otherwise if you have not flagged tokens as required, you will be prompted to enter your password.
 4. Configure git to use the script. The domain option defaults to my.1password.com, which 
 is the correct setting for individual accounts. If you have a team or business account, you
 need to use a different domain.
