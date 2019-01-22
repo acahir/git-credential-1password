@@ -37,8 +37,7 @@ as "github.com". You can search for anything as a test, but git will use the hos
   ```git config --global credential.helper '1password -t -q --domain=<domain>'```
 
 
-Note: it has only been tested on macos, but should work on linux. It is unlikely to 
-work on Windows.
+Note: it has only been tested on macos, but should work on linux. It is unlikely to work on Windows from my understanding of python on that platform.
 
 
 ### References
