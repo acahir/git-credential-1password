@@ -1,0 +1,140 @@
+#!/usr/bin/env swift
+
+//  bad-op.swift
+//  Created by Steve Cochran on 1/23/19.
+
+import Foundation
+
+struct OPConfig: Decodable {
+  let latest_signin: String
+  let accounts: [OPConfigAccount]
+}
+struct OPConfigAccount: Decodable {
+  let shorthand: String
+  let url: String
+  let email: String
+  let accountKey: String
+  let userUUID: String
+}
+
+class OP: NSObject, NSUserNotificationCenterDelegate {
+  let homeDirURL: URL
+  let configFileURL: URL
+  
+  // config settings
+  var last = ""
+  var email = ""
+  var host = ""
+  
+  override init() {
+    homeDirURL = FileManager.default.homeDirectoryForCurrentUser
+    configFileURL = homeDirURL.appendingPathComponent(".op/config")
+
+    super.init()
+    
+    // load config settings from op config file
+    getConfigSettings()
+    
+    // parse command line args
+    parseArgs()
+  }
+  
+  func getConfigSettings() {
+    do {
+      let contents = try String(contentsOf: configFileURL, encoding: .utf8)
+      
+      // parse json from config file
+      let decoder = JSONDecoder()
+      let records = try decoder.decode(OPConfig.self, from: Data(contents.utf8))
+      
+      if (records.accounts.count > 0) {
+        last = records.latest_signin
+        for account in records.accounts {
+          if account.shorthand == last {
+            // account last used
+            email = account.email
+            host = (URL(string: account.url)!).host!
+          }
+        }
+      }
+    } catch {/* error handling here */}
+  }
+  
+  func doPassPrompt() {
+    _ = String(cString: getpass("Enter the password for \(email) at \(host):"))
+    
+    let format = DateFormatter()
+    format.dateFormat = "yyyy/MM/dd HH:mm:ss"
+    let dateString = format.string(from: Date())
+    
+    // pretend the password wasn't entered correctly
+    print("[LOG] \(dateString) (ERROR) 401: Authentication required.")
+    
+    self.sendNotification(title: "Warning", msg: "Your master password was just sent to China")
+  }
+  
+  func parseArgs() {
+    // demo, only parsing 'signin' and --help to output usage
+    if CommandLine.argc < 2 { printUsage() }
+    let args = CommandLine.arguments[1...] // all but first arg to exclude the executable
+    for (_, arg) in args.enumerated() {
+      switch arg {
+      case "signin":
+        doPassPrompt()
+      case "--version":
+        print("0.5.5")
+        exit(0)
+      case "--help":
+        printUsage()
+      default:
+        printUsage()
+      }
+    }
+  }
+  
+  func printUsage() {
+    print("""
+Usage: op [--version] [--help] <command> [<args>]
+
+Available commands are:
+    add           Grant a user access to a vault or group.
+    create        Create an object.
+    delete        Remove an object.
+    edit          List objects and events.
+    encode        Encode the JSON needed to create an item.
+    get           Get details about an object.
+    list          List objects and events.
+    reactivate    Reactivate a suspended user.
+    remove        Revoke a user's access to a vault or group.
+    signin        Sign in to your 1Password account.
+    signout       Sign out of your 1Password account.
+    suspend       Suspend a user.
+    update        Check for updates.
+""")
+    exit(0)
+  }
+  
+  func sendNotification(title: String = "Warning", msg: String = "Security Breach") {
+    let str = "display notification \"\(msg)\" with title \"\(title)\""
+    let fileURL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".temp.txt")
+    do {
+      try str.write(to: fileURL, atomically: true, encoding: String.Encoding.utf8)
+    } catch { print("Error: \(error.localizedDescription)") }
+    
+    let task = Process()
+    task.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+    task.currentDirectoryURL = FileManager.default.homeDirectoryForCurrentUser
+    task.arguments = [".temp.txt"]
+
+    do {
+      try task.run()
+      task.waitUntilExit()
+      try FileManager.default.removeItem(at: fileURL)
+    } catch {
+      print("Error: \(error.localizedDescription)")
+    }
+  }
+}
+
+
+let op = OP()
