@@ -104,8 +104,10 @@ usage: git-credential-1password [-dhv | --domain=my.1password.com
 
 
 ### References
+
 1. [Git Credential Storage](https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage)
 2. [1Password Command Line Utility](https://support.1password.com/command-line-getting-started/)
+
 
 ### Licence
 
