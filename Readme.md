@@ -8,7 +8,7 @@ Repo also includes a development version written in swift that is currently in t
 ### How it works
 
 Git passes in parameters on stdin, and this utility returns a username and 
-password on stdout if returned from the 1Password CLI. See the references for full details.
+password on stdout if found in 1Password. See the [references](https://github.com/acahir/git-credential-1password#references) for full details.
 
 
 ### Status
@@ -67,6 +67,8 @@ The swift script uses the same workaround, only relying on existing, valid token
 
 ### Command Line Usage
 
+The command line usage output which incliudes full options definitions.
+
 <pre>
 usage: git-credential-1password [-dhv | --domain=my.1password.com 
                  --help | --verbose ] get
@@ -98,8 +100,6 @@ usage: git-credential-1password [-dhv | --domain=my.1password.com
     
     returns  0  if item exists
 </pre>
-
-
 
 
 
