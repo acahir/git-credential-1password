@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		92120E3C21F68FC80098DE9A /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92120E3B21F68FC80098DE9A /* main.swift */; };
+		923AC46421F9592500AFEF6A /* OP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AC46321F9592500AFEF6A /* OP.swift */; };
+		923AC46621F9597C00AFEF6A /* Console.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AC46521F9597C00AFEF6A /* Console.swift */; };
+		923AC46821F95A2500AFEF6A /* Shell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AC46721F95A2500AFEF6A /* Shell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,7 +28,10 @@
 /* Begin PBXFileReference section */
 		92120E3821F68FC80098DE9A /* git-credential-1password */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "git-credential-1password"; sourceTree = BUILT_PRODUCTS_DIR; };
 		92120E3B21F68FC80098DE9A /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		923AC3D821F7542200AFEF6A /* json.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = json.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.json; };
+		923AC46321F9592500AFEF6A /* OP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OP.swift; sourceTree = "<group>"; };
+		923AC46521F9597C00AFEF6A /* Console.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Console.swift; sourceTree = "<group>"; };
+		923AC46721F95A2500AFEF6A /* Shell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shell.swift; sourceTree = "<group>"; };
+		923AC46D21F98E6500AFEF6A /* private */ = {isa = PBXFileReference; lastKnownFileType = text; path = private; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,8 +64,11 @@
 		92120E3A21F68FC80098DE9A /* git-credential-1password */ = {
 			isa = PBXGroup;
 			children = (
+				923AC46721F95A2500AFEF6A /* Shell.swift */,
+				923AC46521F9597C00AFEF6A /* Console.swift */,
+				923AC46321F9592500AFEF6A /* OP.swift */,
 				92120E3B21F68FC80098DE9A /* main.swift */,
-				923AC3D821F7542200AFEF6A /* json.swift */,
+				923AC46D21F98E6500AFEF6A /* private */,
 			);
 			path = "git-credential-1password";
 			sourceTree = "<group>";
@@ -74,6 +83,7 @@
 				92120E3421F68FC80098DE9A /* Sources */,
 				92120E3521F68FC80098DE9A /* Frameworks */,
 				92120E3621F68FC80098DE9A /* CopyFiles */,
+				923AC46C21F98A5E00AFEF6A /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -116,11 +126,34 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		923AC46C21F98A5E00AFEF6A /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nsed -e '/OP_CLASS/ r Op.swift' main.swift | sed -e '/CONSOLE_CLASS/ r Console.swift' | sed -e '/SHELL_CLASS/ r Shell.swift' > git-credential-1p; chmod u+x git-credential-1p\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		92120E3421F68FC80098DE9A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				923AC46421F9592500AFEF6A /* OP.swift in Sources */,
+				923AC46621F9597C00AFEF6A /* Console.swift in Sources */,
+				923AC46821F95A2500AFEF6A /* Shell.swift in Sources */,
 				92120E3C21F68FC80098DE9A /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

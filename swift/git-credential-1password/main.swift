@@ -2,161 +2,167 @@
 
 import Foundation
 
-// parse args and set options if needed
-let verbose = false
-let quiet = false
+/* ---- variables and default values ---- */
 
-// can avoid this by using /usr/local/env op
 let opPath = "/usr/local/bin/op"
 
-// defaults while developting/testing
-let domain = "my.1password.com"
-let host = "github.com"
-
-enum OutputType {
-  case error
-  case standard
+struct Options {
+  var verbose = false
+  var quiet = false
+  var requireEnvToken = false
+  var domain = "my.1password.com"
 }
 
-/* ---- Structs, Classes, and Functions ---- */
-struct OPItem: Decodable {
-  let details: OPItemDetails
-}
-struct OPItemDetails: Decodable {
-  let fields: [OPItemDetailsFields]
-}
-struct OPItemDetailsFields: Decodable {
-  let designation: String
-  let value: String
+struct MainVars {
+  var status: Int32 = 0
+  var gtg = false
+  var params = [String:String]()
 }
 
-class ConsoleIO {
-  func writeMessage(_ message: String, to: OutputType = .standard) {
-    switch to {
-    case .standard:
-      // 1
-      print("\(message)")
-    case .error:
-      // 2
-      fputs("\(message)\n", stderr)
-      // fputs("\u{001B}[0;31m\(message)\n", stderr) // red
-    }
+var options = Options()
+var main = MainVars()
+
+/* ---- Structs, Classes, and Helper Functions ---- */
+
+/* -- CONSOLE_CLASS  -- */
+
+
+// exitOnError function
+// - conditionally displays msg based on verbose and force
+// - sends quit signal to git crediental if in quiet mode
+// - exits with status
+func exitOnError(msg: String, force: Bool, status: Int32) {
+  // tell github credential to quit if we encounter an error
+  if options.quiet {
+    print("quit=1")
   }
-  
-  func printUsage(_ msg:String = "") {
-    let executableName = (CommandLine.arguments[0] as NSString).lastPathComponent
-    
-    if msg != "" {
-      writeMessage("\(msg)\n", to:.error)
-    }
-    
-    writeMessage("usage: \(executableName) [ -hvq | --help | --verbose | --quiet ] item\n")
-    writeMessage("  searches for item and prints username and password to stout if found\n")
-    writeMessage("  -v, --verbose  prints out verbose (debug) messages")
-    writeMessage("  -q, --quiet    suppresses all standard output messages")
-    writeMessage("  note: -v and -q are independent, -q will not supress -v messages\n")
-    writeMessage("  returns  0  if item exists")
-    writeMessage("           N  if N (> 1) items found")
-    writeMessage("          -1  if item not found")
-    writeMessage("          -2  if this message was displayed")
-    writeMessage("           1  in all other cases")
+  if (options.verbose || force) {
+    fputs("\(msg)\n", stderr)
+  }
+  exit(status)
+}
+
+
+/* -- SHELL_CLASS  -- */
+
+/* -- OP_CLASS  -- */
+
+/* ---- End Structs, Classes, and Helper Functions ---- */
+
+// init objects
+let console = Console()
+let op = OP()
+
+
+// -d --domain, -h --help, -q --quiet, -t --token, -v --verbose
+func parseArgs() {
+  let args = CommandLine.arguments[1...] // all but first arg to exclude the executable
+  for (index, arg) in args.enumerated() {
+    let splitArg = arg.components(separatedBy: "=")
+    // process each arg
+    switch splitArg[0] {
+    case "-d":
+      options.domain = args[index + 1]
+      // sanity check, should not start with a '-'
+      if options.domain.prefix(1) == "-" {
+        exitOnError(msg: "Error reading domain following option '-d'", force: false, status: 1)
+      }
+    case "--domain":
+      if splitArg.count == 2 {
+        options.domain = splitArg[1]
+      } else {
+        exitOnError(msg: "Error reading value from option '--domain'", force: false, status: 1)
+      }
+    case "-h", "--help":
+      op.printUsage()
+      exit(0)
+    case "-q", "--quiet":
+      options.quiet = true
+    case "-t", "--token":
+      options.requireEnvToken = true
+    case "-v", "--verbose":
+      options.verbose = true
+    case "get":
+      // this should be the final arg, but don't rely on that
+      // we found 'get' arg, so we're good to go
+      main.gtg = true
+    case "store", "erase":
+      exitOnError(msg: "Launched with arg: \(arg). This utility only supports get requests.", force: false, status: 0)
+    default:
+      // warn if unknown arg, but don't need to exit if all others are good
+      console.write("Unknown argument: \(arg), ignoring ", to: .error) }
   }
 }
 
-let consoleIO = ConsoleIO()
-
-func shell(_ launchPath: String, _ arguments: [String] = []) -> (String?, Int32) {
-  let task = Process()
-  task.executableURL = URL(fileURLWithPath: launchPath)
-  task.arguments = arguments
-  
-  let pipe = Pipe()
-  task.standardOutput = pipe
-  task.standardError = pipe
-  do {
-    if verbose { consoleIO.writeMessage("Running process \(launchPath) with args: \(arguments)", to: .error) }
-    try task.run()
-  } catch {
-    consoleIO.writeMessage("Error: \(error.localizedDescription)", to: .error)
-    exit(-2)
-  }
-    
-  let data = pipe.fileHandleForReading.readDataToEndOfFile()
-  let output = String(data: data, encoding: .utf8)
-  if verbose {
-    consoleIO.writeMessage("Shell return status: \(task.terminationStatus)", to: .error)
-  }
-  
-  task.waitUntilExit()
-  return (output, task.terminationStatus)
-}
-
-func getPW() -> String? {
-  return String(cString: getpass("Password:"))
-}
-
-// gets a valid 1Password token either from env or from a signin
-func getOpToken(_ opDomain: String = domain) -> String? {
-  // check for a token in env
-  let envVars = ProcessInfo.processInfo.environment
-  for (key, val) in envVars {
-    if key.hasPrefix("OP_SESSION_") {
-      if verbose { consoleIO.writeMessage("Found token in env vars", to: .error) }
-      return val
-    }
-  }
-  
-  // op signin call currently disabled because terminal is echoing pw when entered
-  // Not sure why, when op called from a perl or python script, pw is not echoed
-  // also can prompt for a password in termianl from this script using getpass()
-//  let (optToken, _) = shell(opPath, ["signin", opDomain, "--output=raw"])
-//  if let token = optToken {
-//    return token
-//  } else {
-//    // TODO - handle error
-//  }
-  
-  // default return
-  return nil
-}
 /* ---- End Structs, Classes, and Functions ----- */
 
-// begin script execution here
-var status: Int32 = 0
 
-// get a valid token
-let optToken = getOpToken(domain)
-guard let token = optToken else {
-  // TODO - handle error
+
+/* ---- Script Execution Begins Here ---- */
+
+// parse command line arguments
+parseArgs()
+
+console.write("Launched with options: \(CommandLine.arguments[1...])", to: .error)
+
+// check to make sure we have everything we need and how to continue
+//   ie interactively or automated
+if !main.gtg {
+  exitOnError(msg: "Missing 'get' arg. This utility only supports get requests.", force: false, status: 1)
+}
+
+
+// if not quiet, prompt for interactive input
+if !options.quiet {
+  print("Enter host in 'host=value' format followed by a blank line:")
+}
+
+// read input from stdin either from user interactively or from git credentials
+while true {
+  let optLine = readLine(strippingNewline: true)
+  if let line = optLine {
+    if line == "" {
+      break
+    } else {
+      console.write("Input line: \(line)", to: .error)
+      let parts = line.components(separatedBy: "=")
+      if parts.count == 2 {
+        main.params[parts[0]] = parts[1]
+      }
+    }
+  }
+}
+
+
+// verify we have a host param
+guard let host = main.params["host"] else {
+  // didn't find a 'host' key, handle error
+  exitOnError(msg: "Invalid input: missing host value", force: false, status: 1)
+  exit(1)
+}
+
+// get a valid token either from env or call to op
+guard op.getToken(options.domain) else {
+  exitOnError(msg: "Unable to get session token", force: false, status: 2)
   exit(2)
 }
 
 // get item json
-var optItem: String?
-(optItem, status) = shell(opPath, ["get", "item", host, "--session=" + token])
-guard let item = optItem, status == 0 else {
-  // TODO - handle error
-  if let item = optItem {
-    consoleIO.writeMessage("Error getting item: \(item) ", to: .error)
-  }
-  consoleIO.writeMessage("Reeturn status: \(status) ", to: .error)
-  exit(-2)
+var optItem = op.getItem(query: host)
+guard let item = optItem else {
+  exitOnError(msg: "Error getting item", force: false, status: 1)
+  exit(2)
 }
 
-// should now have a valid json object in item
-if verbose {
-  consoleIO.writeMessage("Received item:" + item.prefix(50) + "...", to: .error)
-}
 
-// parse json
-do {
-  let decoder = JSONDecoder()
-  let records = try decoder.decode(OPItem.self, from: Data(item.utf8))
-  
-  var user = ""
-  var pass = ""
-  if (records.details.fields.count > 0) {
-    for field in records.details.fields {
+// get struct from json
+let optResult = op.parseItem(data: item)
+
+// get user and pass from results and print to stdout
+if let result = optResult {
+  var user = "", pass = ""
+  if (result.details.fields.count > 0) {
+    for field in result.details.fields {
       if field.designation == "username" {
         user = field.value
       } else if field.designation == "password" {
@@ -164,13 +170,12 @@ do {
       }
     }
   } else {
-    print("No Fields")
+    exitOnError(msg: "No fields in query response", force: false, status: 1)
   }
   
-  print("username=\(user)\npassword=\(pass)\n")
-} catch {
-  // error decoding json
-  print("Error decoding json")
+  print("username=\(user)\npassword=\(pass)")
+} else {
+  exitOnError(msg: "No result from get item", force: false, status: 1)
 }
 
 exit(0)
