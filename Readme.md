@@ -116,4 +116,4 @@ usage: git-credential-1password [-dhv | --domain=my.1password.com
 
 ### Licence
 
-Covered by the MIT License
+Released under the Unlicense
