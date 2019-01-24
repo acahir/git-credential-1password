@@ -16,17 +16,23 @@ password on stdout if found in 1Password. See the [references](https://github.co
 The python script is functional with good error handling and can be considered ready for use. It currently only works with existing, non-expired 1Password session tokens stored in the shell env, with a flag (-t) to enforce this behavior.
 
 
-The swift script is under development but basic functionality with 1Password is working. It has not be tested invoked by git.
+The swift script is now feature equivalent with the python script. It can be compiled into a binary or installed as a swift script. After downloading or 
+cloning the project, b
 
 
 
 ### Installation & Usage
 
-The current working version is the python script.
-
-1. [Install](https://support.1password.com/command-line-getting-started/) the 1Password command line tool.
-2. Download the script and save it as an executable file somewhere in your PATH. On macOS, ```/usr/local/bin/``` would be a good choice.
-3. Configure git to use the script. The domain option defaults to my.1password.com, which  is the correct setting for individual accounts. If you have a team or business account, you need to use a different domain.
+1. First install the [1Password command line utility](https://support.1password.com/command-line-getting-started/).
+2. Download or clone this project to your computer.
+3. Decide if you want to use the python script, swift script, or swift binary and use the options below to find the correct file:
+    - Python: locate the file git-credential-1password in the python directory of the downloaded project
+    - Swift: First open the xcode project and build the release scheme.
+    - Swift script: The swift script is located at project/swift/git-credential-1password/git-credential-1password.swift
+    - Swift binary: Control-click on git-credential-1password under Products in the left sidebar of Xcode and choose "Show in Finder"
+4. Move your chosen script to somewhere in your path and name it "git-credential-1password". A good choice would be  ```/usr/local/bin/```
+    - Note: only the swift script should need renaming.
+5. Configure git to use the script with the command: ```git config --global credential.helper '1password -t -q --domain=<domain>'``` The domain option defaults to my.1password.com if not included, which is the correct setting for individual accounts. If you have a team or business account, you need to use a different domain.
   ```git config --global credential.helper '1password -t -q --domain=<domain>'```
 
 
@@ -37,10 +43,9 @@ To test the script, you can run it interactively from the command line.
 1. Launch the script: ```/path/to/git-credential-1password --domain=<your domain> get```
 2. You will be prompted to enter the "host" to search for, in the format 
 ```host=example.com```. This is actually the name of an item in 1Password, such 
-as "github.com". You can search for anything as a test, but git will use the host of the remote git service as the search value.
+as "github.com". You can search for anything as a test, but git will use the host of the remote git service as the passed in value.
 3. Enter a blank line after you have entered the host.
 4. If you have a valid token, that's it. Otherwise if you have not flagged tokens as required, you will be prompted to enter your password.
-
 
 Note: it has only been tested on macos, but should work on linux. It is unlikely to work on Windows from my understanding of python on that platform.
 
