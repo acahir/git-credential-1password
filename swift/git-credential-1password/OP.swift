@@ -40,7 +40,7 @@ class OP {
   // get a valid token for OP session
   // - first checks env for token
   // - if not found and requireEnvToken not set, will do op signin
-  func getToken(_ opDomain: String) -> Bool {
+  func getToken(_ domain: String = "my.1password.com") -> Bool {
     // check for a token in env
     let envVars = ProcessInfo.processInfo.environment
     for (key, val) in envVars {
@@ -56,7 +56,7 @@ class OP {
     if !requireEnvToken {
       let shell = Shell(path: opPath)
       
-      let (optToken, optErr, status) = shell.execute(["signin", opDomain, "--output=raw"])
+      let (optToken, optErr, status) = shell.execute(["signin", domain, "--output=raw"])
       if optToken != nil {
         self.token = optToken!
         return true
@@ -66,6 +66,9 @@ class OP {
         }
         exitOnError(msg: "Return status: \(status) ", force: false, status: status)
       }
+    } else {
+      // no token found and token required
+      exitOnError(msg:"No token found but required. You can get a new token with the command:\n    eval $(op signin \(domain))", force: true, status: 2)
     }
     
     return false
@@ -79,12 +82,20 @@ class OP {
       let (optItem, optErr, status) = shell.execute(["get", "item", query, "--session=" + tok])
       guard let item = optItem, status == 0 else {
         if let err = optErr {
-          console.write("Error getting item: \(err) ", to: .error)
+          if err.hasSuffix("You are not currently signed in. Please run `op signin --help` for instructions\n") {
+            let msg = "Expired token found but required. You can get a new token for with the command:\n    eval $(op signin)"
+            if requireEnvToken { exitOnError(msg: msg, force: true, status: 2) }
+            // TODO - if getting tokens fixed, add else clause here to
+            //   - get a new token and
+            //   - call getItems .
+            //   Be sure to guard against infinite recursion if getToken fails again
+          } else {
+            console.write("Error getting item: \(err) ", to: .error)
+          }
         }
         exitOnError(msg: "Return status: \(status) ", force: false, status: status)
         return nil
       }
-      
       // should now have a valid json object in item
       console.write("Received item:" + item.prefix(40) + "...", to: .error)
       return item

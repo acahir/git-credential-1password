@@ -14,7 +14,6 @@ class Shell {
   
   init(path: String) {
     self.console = Console()
-    
     execPath = URL(fileURLWithPath: path)
   }
   
@@ -23,8 +22,9 @@ class Shell {
   //    - stdout as String?
   //    - stderr as String?
   //    - return status from process called
-  func execute(_ arguments: [String] = []) -> (String?, String?, Int32) {
+  func execute(_ arguments: [String]) -> (String?, String?, Int32) {
     let task = Process()
+    task.executableURL = execPath
     task.arguments = arguments
     
     let sOut = Pipe()
@@ -40,6 +40,8 @@ class Shell {
       exit(-2)
     }
     
+    task.waitUntilExit()
+    
     // stdout and strerr to strings
     var data = sOut.fileHandleForReading.readDataToEndOfFile()
     let output = String(data: data, encoding: .utf8)
@@ -47,8 +49,7 @@ class Shell {
     let error = String(data: data, encoding: .utf8)
     
     console.write("Shell return status: \(task.terminationStatus)", to: .error)
-    
-    task.waitUntilExit()
+
     return (output, error, task.terminationStatus)
   }
   

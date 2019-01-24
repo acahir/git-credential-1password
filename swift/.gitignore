@@ -4,6 +4,7 @@
 
 ## project specific
 /git-credential-1password/json.swift
+/git-credential-1password/git-credential-1password.swift
 
 ## Build generated
 build/

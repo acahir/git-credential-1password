@@ -142,7 +142,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nsed -e '/OP_CLASS/ r Op.swift' main.swift | sed -e '/CONSOLE_CLASS/ r Console.swift' | sed -e '/SHELL_CLASS/ r Shell.swift' > git-credential-1p; chmod u+x git-credential-1p\n";
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\ncd git-credential-1password; sed -e '/OP_CLASS/ r Op.swift' main.swift | sed -e '/CONSOLE_CLASS/ r Console.swift' | sed -e '/SHELL_CLASS/ r Shell.swift' > git-credential-1password.swift; chmod u+x git-credential-1password.swift\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

@@ -9,7 +9,6 @@ let opPath = "/usr/local/bin/op"
 struct Options {
   var verbose = false
   var quiet = false
-  var requireEnvToken = false
   var domain = "my.1password.com"
 }
 
@@ -23,6 +22,13 @@ var options = Options()
 var main = MainVars()
 
 /* ---- Structs, Classes, and Helper Functions ---- */
+//
+// WARNING
+// NAME_CLASS below markers are used during build process
+// to merge this file and the contents of class files into
+// a new combined file which can be run uncompiled from the
+// command line. Removing them will break this
+
 
 /* -- CONSOLE_CLASS  -- */
 
@@ -79,7 +85,7 @@ func parseArgs() {
     case "-q", "--quiet":
       options.quiet = true
     case "-t", "--token":
-      options.requireEnvToken = true
+      op.requireEnvToken = true
     case "-v", "--verbose":
       options.verbose = true
     case "get":
