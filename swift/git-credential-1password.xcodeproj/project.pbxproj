@@ -32,6 +32,7 @@
 		923AC46521F9597C00AFEF6A /* Console.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Console.swift; sourceTree = "<group>"; };
 		923AC46721F95A2500AFEF6A /* Shell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shell.swift; sourceTree = "<group>"; };
 		923AC46D21F98E6500AFEF6A /* private */ = {isa = PBXFileReference; lastKnownFileType = text; path = private; sourceTree = "<group>"; };
+		92705E3121F9D9E500B49F98 /* item.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = item.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +70,7 @@
 				923AC46321F9592500AFEF6A /* OP.swift */,
 				92120E3B21F68FC80098DE9A /* main.swift */,
 				923AC46D21F98E6500AFEF6A /* private */,
+				92705E3121F9D9E500B49F98 /* item.json */,
 			);
 			path = "git-credential-1password";
 			sourceTree = "<group>";
