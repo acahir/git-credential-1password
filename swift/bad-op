@@ -1,7 +1,12 @@
 #!/usr/bin/env swift
 
-//  bad-op.swift
-//  Created by Steve Cochran on 1/23/19.
+/*  bad-op
+*
+*   Simple proof of concept that mimics a subset of the 1Password
+*   command line utility to harvest the master password.
+*     - usage output
+*     - signin password prompt
+*/
 
 import Foundation
 
@@ -135,6 +140,5 @@ Available commands are:
     }
   }
 }
-
 
 let op = OP()
