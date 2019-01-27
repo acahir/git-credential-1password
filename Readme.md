@@ -32,8 +32,10 @@ cloning the project, b
     - Swift binary: Control-click on git-credential-1password under Products in the left sidebar of Xcode and choose "Show in Finder"
 4. Move your chosen script to somewhere in your path and name it "git-credential-1password". A good choice would be  ```/usr/local/bin/```
     - Note: only the swift script should need renaming.
-5. Configure git to use the script with the command: ```git config --global credential.helper '1password -t -q --domain=<domain>'``` The domain option defaults to my.1password.com if not included, which is the correct setting for individual accounts. If you have a team or business account, you need to use a different domain.
+5. If you are using one of the swift options, you need to remove the quarentine setting from OP that Apple's Gatekeeper security system applies to downloaded applications. The simplest way is to run the following in the terminal (modify the path to where you installed OP) ```xattr -d com.apple.quarantine /usr/local/bin/op```
+6. Configure git to use the script with the command: ```git config --global credential.helper '1password -t -q --domain=<domain>'``` The domain option defaults to my.1password.com if not included, which is the correct setting for individual accounts. If you have a team or business account, you need to use a different domain.
   ```git config --global credential.helper '1password -t -q --domain=<domain>'```
+
 
 
 #### Testing
